@@ -1,0 +1,72 @@
+cmake_minimum_required(VERSION 3.20)
+project(parallel_final)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # using Clang
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj,-O2")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  # using Intel C++
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
+
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wa,-mbig-obj,-O2")
+
+# if(MSVC)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+# endif()
+
+
+# output directories
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+
+
+
+# dependencies
+
+# add_subdirectory(dependencies/polyscope)
+
+# add_subdirectory(dependencies/OpenMesh)
+
+# add_subdirectory(dependencies/OpenVolumeMesh)
+
+add_subdirectory(dependencies/eigen)
+
+add_subdirectory(dependencies/libigl)
+
+# add_subdirectory(dependencies/TetGen)
+
+
+
+
+file(GLOB_RECURSE app_head_files "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
+file(GLOB_RECURSE app_source_files "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
+
+add_executable(${PROJECT_NAME} ${app_head_files} ${app_source_files})
+
+
+target_include_directories(
+    ${PROJECT_NAME} 
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    # ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/gmm-5.4/include
+    # ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/TetGen
+    )
+
+target_link_libraries(
+    ${PROJECT_NAME} 
+    PRIVATE 
+#     polyscope
+#     OpenMeshCore
+#     OpenMeshTools
+#     OpenVolumeMesh::OpenVolumeMesh
+    Eigen3::Eigen
+    igl::core
+#     tet
+)
