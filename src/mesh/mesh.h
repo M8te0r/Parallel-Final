@@ -5,57 +5,52 @@
 
 namespace PF
 {
-    class Mesh
-    {
-    public:
-        Mesh() = default;
-        Mesh(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F);
-        ~Mesh() = default;
+class Mesh
+{
+  public:
+    Mesh() = default;
+    Mesh(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F);
+    ~Mesh() = default;
 
-        bool LoadFromFile(const char *filename);
+    bool LoadFromFile(const char *filename);
 
-        // 顶点拓扑
-        std::vector<size_t> &GetVV(size_t vi);
-        std::vector<size_t> &GetVE(size_t vi);
-        std::vector<size_t> &GetVF(size_t vi);
+    // 顶点拓扑
+    std::vector<size_t> &GetVV(size_t vi);
 
-        // 边拓扑
-        std::vector<size_t> &GetEV(size_t ei);
-        std::vector<size_t> &GetEE(size_t ei);
-        std::vector<size_t> &GetEF(size_t ei);
 
-        // 面拓扑
-        std::vector<size_t> &GetFV(size_t fi);
-        std::vector<size_t> &GetFE(size_t fi);
-        std::vector<size_t> &GetFF(size_t fi);
+    // 边拓扑
 
-    private:
-        void BuildTopology();
-        void GetLAR(Eigen::SparseMatrix<int> &mat_ev, Eigen::SparseMatrix<int> &mat_ef);
+    // 面拓扑
 
-        Eigen::SparseMatrix<int> &Circle(const Eigen::SparseMatrix<int> &a, const Eigen::SparseMatrix<int> &b);
+  private:
+    void BuildTopology();
+    void GetLAR(Eigen::SparseMatrix<int> &base_mev, Eigen::SparseMatrix<int> &base_mfe);
 
-    private:
-        Eigen::MatrixXd vertices;
-        Eigen::MatrixXi faces;
+    Eigen::SparseMatrix<int> &Circle(const Eigen::SparseMatrix<int> &a, const Eigen::SparseMatrix<int> &b);
+    Eigen::VectorXi &Wedge(const Eigen::SparseMatrix<int> &a, const Eigen::SparseMatrix<int> &b, size_t idx);
+    Eigen::VectorXi &Wedge(const Eigen::VectorXi &a, const Eigen::VectorXi &b);
 
-        // ------------------------
-        // Linear Algebra Representation
-        // ------------------------
-        Eigen::SparseMatrix<int> m_1; // matrix of 1-cell(edge) m_ev
-        Eigen::SparseMatrix<int> m_2; // matrix of 2-cell(face) m_fv
-        Eigen::SparseMatrix<int> m_3; // matrix of 3-cell(cell) m_cf
 
-        Eigen::SparseMatrix<int> m_ev; // basic
-        Eigen::SparseMatrix<int> m_ee;
-        Eigen::SparseMatrix<int> m_ef; // basic
+  private:
+    Eigen::MatrixXd vertices;
+    Eigen::MatrixXi faces;
 
-        Eigen::SparseMatrix<int> m_vv;
-        Eigen::SparseMatrix<int> m_ve;
-        Eigen::SparseMatrix<int> m_vf;
+    // ------------------------
+    // Linear Algebra Representation
+    // ------------------------
+    Eigen::SparseMatrix<int> partial_1; // boundary operatior matrix of 1-cell(edge) m_ev
+    Eigen::SparseMatrix<int> partial_2; // boundary operatior matrix of 2-cell(face) m_fe
 
-        Eigen::SparseMatrix<int> m_fv;
-        Eigen::SparseMatrix<int> m_fe;
-    };
+    Eigen::SparseMatrix<int> m_ev; // m1
+    Eigen::SparseMatrix<int> m_ee;
+    Eigen::SparseMatrix<int> m_ef; // basic
+
+    Eigen::SparseMatrix<int> m_vv;
+    Eigen::SparseMatrix<int> m_ve;
+    Eigen::SparseMatrix<int> m_vf;
+
+    Eigen::SparseMatrix<int> m_fv; // m2
+    Eigen::SparseMatrix<int> m_fe;
+};
 
 } // namespace PF

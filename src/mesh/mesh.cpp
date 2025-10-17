@@ -1,181 +1,147 @@
 #include "mesh.h"
-#include <igl/readOBJ.h>
 #include <igl/edge_topology.h>
+#include <igl/readOBJ.h>
 
 namespace PF
 {
-    Mesh::Mesh(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F)
-        : vertices(V), faces(F)
+Mesh::Mesh(const Eigen::MatrixXd &V, const Eigen::MatrixXi &F) : vertices(V), faces(F)
+{
+}
+
+bool Mesh::LoadFromFile(const char *filename)
+{
+    if (!igl::readOBJ(filename, this->vertices, this->faces))
     {
+        return false;
     }
 
-    bool Mesh::LoadFromFile(const char *filename)
+    BuildTopology();
+    return true;
+}
+
+std::vector<size_t> &Mesh::GetVV(size_t vi)
+{
+    static std::vector<size_t> indices;
+    indices.clear();
+
+    if (m_vv.size() == 0)
     {
-        return igl::readOBJ(filename, this->vertices, this->faces);
+        // m_vv_raw = (m_ev.transpose()) * m_ev;
+        m_vv = Circle(m_ev.transpose(), m_ev);
     }
 
-    std::vector<size_t> &Mesh::GetVV(size_t vi)
+    std::cout << m_vv << std::endl;
+
+    indices.reserve(m_vv.rows());
+    for (Eigen::SparseMatrix<int>::InnerIterator it(m_vv, vi); it; ++it)
     {
-        static std::vector<size_t> indices;
-        indices.clear();
-
-        if (m_vv.size() == 0)
-        {
-            m_vv = (m_ev.transpose()) * m_ev;
-        }
-
-        indices.reserve(m_vv.rows());
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_vv, vi); it; ++it)
-        {
-            indices.push_back(it.index());
-        }
-
-        return indices;
+        indices.push_back(it.index());
     }
 
-    std::vector<size_t> &Mesh::GetVF(size_t vi)
+    return indices;
+}
+
+void Mesh::BuildTopology()
+{
+    // LAR
+    GetLAR(partial_1, partial_2);
+    m_ev = partial_1;
+    m_fe = partial_2;
+}
+
+void Mesh::GetLAR(Eigen::SparseMatrix<int> &p1, Eigen::SparseMatrix<int> &p2)
+{
+    Eigen::MatrixXi EV, FE, EF; // EV:Ex2 FE:Fx3
+    igl::edge_topology(this->vertices, this->faces, EV, FE, EF);
+
+    p1 = Eigen::SparseMatrix<int>(EV.rows(), this->vertices.rows());
+    for (size_t i = 0; i < EV.rows(); ++i)
     {
-        static std::vector<size_t> indices;
-        indices.clear();
-
-        if (m_vf.size() == 0)
-        {
-            m_vf = (m_ev.transpose()) * m_ef;
-        }
-
-        indices.reserve(m_vv.rows());
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_vf, vi); it; ++it)
-        {
-            indices.push_back(it.index());
-        }
-
-        return indices;
+        int v_i = EV(i, 0);
+        int v_j = EV(i, 1);
+        p1.insert(i, v_i) = 1; // TODO：应该是-1？
+        p1.insert(i, v_j) = 1;
     }
 
-
-    std::vector<size_t> &Mesh::GetEV(size_t ei)
+    p2 = Eigen::SparseMatrix<int>(this->faces.rows(), EV.rows());
+    for (size_t i = 0; i < this->faces.rows(); ++i)
     {
-        std::vector<size_t> indices(2); // [0] from, [1] to
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_ev, ei); it; ++it)
-        {
-            if (it.col() < 0)
-                indices[0] = it.index();
-            if (it.col() > 0)
-                indices[1] = it.index();
-        }
+        int e_i = this->faces(i, 0);
+        int e_j = this->faces(i, 1);
+        int e_k = this->faces(i, 2);
+        p2.insert(i, e_i) = 1;
+        p2.insert(i, e_j) = 1;
+        p2.insert(i, e_k) = 1;
+    }
+}
 
-        return indices;
+Eigen::SparseMatrix<int> &Mesh::Circle(const Eigen::SparseMatrix<int> &mat_a, const Eigen::SparseMatrix<int> &mat_b)
+{
+    if (mat_a.cols() != mat_b.rows())
+    {
+        throw std::runtime_error("INVALID circle operation!");
     }
 
-    std::vector<size_t> &Mesh::GetEF(size_t ei)
+    int d = 1; // mat_b.cols();
+
+    Eigen::SparseMatrix<int> A = mat_a * mat_b;
+    Eigen::SparseMatrix<int> rslt(mat_a.rows(), mat_b.cols());
+    int rslt_row_index = 0;
+
+
+    for (int k = 0; k < A.outerSize(); ++k)
     {
-        static std::vector<size_t> indices;
-        indices.clear();
-        indices.reserve(2);
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_ef, ei); it; ++it)
+        // 遍历第k行的非零元素
+        for (Eigen::SparseMatrix<int>::InnerIterator it(A, k); it; ++it)
         {
-            indices.push_back(it.index());
-        }
-    }
-
-    
-
-    std::vector<size_t> &Mesh::GetFV(size_t fi)
-    {
-        std::vector<size_t> indices(3); // v0, v1, v2
-        if (m_fv.size() == 0)
-        {
-            m_fv = (m_ef.transpose()) * m_ev;
-        }
-
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_fe, fi); it; ++it)
-        {
-            if (std::abs(it.col()) == 1)
-                indices[0] = it.index();
-            else if (std::abs(it.col()) == 2)
-                indices[1] = it.index();
-            else if (std::abs(it.col()) == 3)
-                indices[2] = it.index();
-        }
-    }
-
-    std::vector<size_t> &Mesh::GetFE(size_t fi)
-    {
-        std::vector<size_t> indices(3);
-
-        if (m_fe.size() == 0)
-        {
-            m_fe = m_ef.transpose();
-        }
-
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_fe, fi); it; ++it)
-        {
-            if (std::abs(it.col()) == 1)
-                indices[0] = it.index();
-            else if (std::abs(it.col()) == 2)
-                indices[1] = it.index();
-            else if (std::abs(it.col()) == 3)
-                indices[2] = it.index();
-        }
-
-        return indices;
-    }
-
-    void Mesh::BuildTopology()
-    {
-        // LAR
-        GetLAR(m_ev, m_ef);
-    }
-
-    void Mesh::GetLAR(Eigen::SparseMatrix<int> &mat_ev, Eigen::SparseMatrix<int> &mat_ef)
-    {
-        Eigen::MatrixXi EV, FE, EF; // EV:Ex2 FE:Fx3
-        igl::edge_topology(this->vertices, this->faces, EV, FE, EF);
-
-        mat_ev = Eigen::SparseMatrix<int>(EV.rows(), this->vertices.rows());
-        for (size_t i = 0; i < EV.rows(); ++i)
-        {
-            int v_i = EV(i, 0);
-            int v_j = EV(i, 1);
-            mat_ev.insert(i, v_i) = -1;
-            mat_ev.insert(i, v_j) = 1;
-        }
-
-        mat_ef = Eigen::SparseMatrix<int>(EF.rows(), this->faces.rows());
-        for (size_t i = 0; i < EF.rows(); ++i)
-        {
-            int f_i = EF(i, 0);
-            int f_j = EF(i, 1);
-            mat_ef.insert(i, f_i) = 1;
-            mat_ef.insert(i, f_j) = 1;
-        }
-    }
-
-    Eigen::SparseMatrix<int> &Mesh::Circle(const Eigen::SparseMatrix<int> &a, const Eigen::SparseMatrix<int> &b)
-    {
-        if (a.rows() != b.cols())
-        {
-            throw std::runtime_error("INVALID circle operation!");
-        }
-
-        int d = 2;
-
-        Eigen::SparseMatrix<int> tempSparse = a * b;
-
-        for (size_t i = 0; i < tempSparse.rows(); ++i)
-        {
-            for (size_t j = 0; j < i; j++)
+            int i = it.row();
+            int j = it.col();
+            int a_ij = it.value();
+            // 处理非对角、且值大于等于d的元素a_{ij}。表示存在公共元素
+            if ((i != j) && (a_ij >= d))
             {
-                if (tempSparse.coeff(i, j) >= 2)
+                // 获取a的第i行和b的第j列，做二进制与运算
+                Eigen::VectorXi rslt_row = Wedge(Eigen::VectorXi(mat_a.row(i)), Eigen::VectorXi(mat_b.col(j)));
+                // 将结果保存至稀疏矩阵中
+                for (int row_inner_index = 0; row_inner_index < rslt_row.size(); ++row_inner_index)
                 {
-                    int binResult = 0;
-                    for (size_t index = 0; index < tempSparse.rows(); ++index)
+                    if (rslt_row(row_inner_index) != 0)
                     {
-                        binResult |= a.coeff(i, index) & b.coeff(index, i);
+                        rslt.insert(rslt_row_index, row_inner_index) = rslt_row(row_inner_index);
                     }
                 }
+                rslt_row_index++;
             }
         }
     }
+    return rslt;
+}
+
+Eigen::VectorXi &Mesh::Wedge(const Eigen::SparseMatrix<int> &a, const Eigen::SparseMatrix<int> &b, size_t idx)
+{
+    Eigen::VectorXi rslt(a.cols());
+    for (size_t i = 0; i < a.cols(); ++i)
+    {
+        rslt[i] = a.coeff(idx, i) & b.coeff(i, idx);
+    }
+    return rslt;
+}
+
+Eigen::VectorXi &Mesh::Wedge(const Eigen::VectorXi &a, const Eigen::VectorXi &b)
+{
+    if (a.size() != b.size())
+    {
+        throw std::runtime_error("Error: INVLAID vector wedge operation!");
+    }
+
+    Eigen::VectorXi rslt(a.size());
+
+    for (size_t i = 0; i < a.size(); ++i)
+    {
+        rslt(i) = a(i) & b(i);
+        std::cout<<rslt(i)<<std::endl;
+    }
+    return rslt;
+}
 
 } // namespace PF
