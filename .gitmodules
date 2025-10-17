@@ -1,0 +1,7 @@
+[submodule "eigen"]
+	path = dependencies/eigen
+	url = https://gitlab.com/libeigen/eigen.git
+
+[submodule "libigl"]
+	path = dependencies/libigl
+	url = https://github.com/libigl/libigl.git

@@ -1,0 +1,14 @@
+[
+{
+  "directory": "D:/dev_project/Parallel-Final/build",
+  "command": "D:\\dev_environment\\MinGW\\x86_64-15.2.0-release-win32-seh-ucrt-rt_v13-rev0\\mingw64\\bin\\g++.exe  @CMakeFiles/parallel_final.dir/includes_CXX.rsp  -Wa,-mbig-obj,-O2 -g -std=gnu++17 -o CMakeFiles\\parallel_final.dir\\src\\main.cpp.obj -c D:\\dev_project\\Parallel-Final\\src\\main.cpp",
+  "file": "D:/dev_project/Parallel-Final/src/main.cpp",
+  "output": "CMakeFiles/parallel_final.dir/src/main.cpp.obj"
+},
+{
+  "directory": "D:/dev_project/Parallel-Final/build",
+  "command": "D:\\dev_environment\\MinGW\\x86_64-15.2.0-release-win32-seh-ucrt-rt_v13-rev0\\mingw64\\bin\\g++.exe  @CMakeFiles/parallel_final.dir/includes_CXX.rsp  -Wa,-mbig-obj,-O2 -g -std=gnu++17 -o CMakeFiles\\parallel_final.dir\\src\\mesh\\mesh.cpp.obj -c D:\\dev_project\\Parallel-Final\\src\\mesh\\mesh.cpp",
+  "file": "D:/dev_project/Parallel-Final/src/mesh/mesh.cpp",
+  "output": "CMakeFiles/parallel_final.dir/src/mesh/mesh.cpp.obj"
+}
+]

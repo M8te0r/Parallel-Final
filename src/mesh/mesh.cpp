@@ -14,31 +14,6 @@ namespace PF
         return igl::readOBJ(filename, this->vertices, this->faces);
     }
 
-    std::vector<size_t> &Mesh::GetEV(size_t ei)
-    {
-        std::vector<size_t> indices(2); // [0] from, [1] to
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_ev, ei); it; ++it)
-        {
-            if (it.col() < 0)
-                indices[0] = it.index();
-            if (it.col() > 0)
-                indices[1] = it.index();
-        }
-
-        return indices;
-    }
-
-    std::vector<size_t> &Mesh::GetEF(size_t ei)
-    {
-        static std::vector<size_t> indices;
-        indices.clear();
-        indices.reserve(2);
-        for (Eigen::SparseMatrix<int>::InnerIterator it(m_ef, ei); it; ++it)
-        {
-            indices.push_back(it.index());
-        }
-    }
-
     std::vector<size_t> &Mesh::GetVV(size_t vi)
     {
         static std::vector<size_t> indices;
@@ -77,12 +52,40 @@ namespace PF
         return indices;
     }
 
+
+    std::vector<size_t> &Mesh::GetEV(size_t ei)
+    {
+        std::vector<size_t> indices(2); // [0] from, [1] to
+        for (Eigen::SparseMatrix<int>::InnerIterator it(m_ev, ei); it; ++it)
+        {
+            if (it.col() < 0)
+                indices[0] = it.index();
+            if (it.col() > 0)
+                indices[1] = it.index();
+        }
+
+        return indices;
+    }
+
+    std::vector<size_t> &Mesh::GetEF(size_t ei)
+    {
+        static std::vector<size_t> indices;
+        indices.clear();
+        indices.reserve(2);
+        for (Eigen::SparseMatrix<int>::InnerIterator it(m_ef, ei); it; ++it)
+        {
+            indices.push_back(it.index());
+        }
+    }
+
+    
+
     std::vector<size_t> &Mesh::GetFV(size_t fi)
     {
         std::vector<size_t> indices(3); // v0, v1, v2
         if (m_fv.size() == 0)
         {
-            m_fv = (m_ef.transpose())*m_ev;
+            m_fv = (m_ef.transpose()) * m_ev;
         }
 
         for (Eigen::SparseMatrix<int>::InnerIterator it(m_fe, fi); it; ++it)
@@ -94,7 +97,6 @@ namespace PF
             else if (std::abs(it.col()) == 3)
                 indices[2] = it.index();
         }
-
     }
 
     std::vector<size_t> &Mesh::GetFE(size_t fi)
@@ -146,6 +148,33 @@ namespace PF
             int f_j = EF(i, 1);
             mat_ef.insert(i, f_i) = 1;
             mat_ef.insert(i, f_j) = 1;
+        }
+    }
+
+    Eigen::SparseMatrix<int> &Mesh::Circle(const Eigen::SparseMatrix<int> &a, const Eigen::SparseMatrix<int> &b)
+    {
+        if (a.rows() != b.cols())
+        {
+            throw std::runtime_error("INVALID circle operation!");
+        }
+
+        int d = 2;
+
+        Eigen::SparseMatrix<int> tempSparse = a * b;
+
+        for (size_t i = 0; i < tempSparse.rows(); ++i)
+        {
+            for (size_t j = 0; j < i; j++)
+            {
+                if (tempSparse.coeff(i, j) >= 2)
+                {
+                    int binResult = 0;
+                    for (size_t index = 0; index < tempSparse.rows(); ++index)
+                    {
+                        binResult |= a.coeff(i, index) & b.coeff(index, i);
+                    }
+                }
+            }
         }
     }
 

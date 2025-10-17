@@ -1,0 +1,78 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"dependencies/eigen/unsupported/Eigen/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 24,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 29,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Devel",
+			"destination" : "include/eigen3/unsupported/Eigen",
+			"paths" : 
+			[
+				"dependencies/eigen/unsupported/Eigen/AdolcForward",
+				"dependencies/eigen/unsupported/Eigen/AlignedVector3",
+				"dependencies/eigen/unsupported/Eigen/ArpackSupport",
+				"dependencies/eigen/unsupported/Eigen/AutoDiff",
+				"dependencies/eigen/unsupported/Eigen/BVH",
+				"dependencies/eigen/unsupported/Eigen/EulerAngles",
+				"dependencies/eigen/unsupported/Eigen/FFT",
+				"dependencies/eigen/unsupported/Eigen/IterativeSolvers",
+				"dependencies/eigen/unsupported/Eigen/KroneckerProduct",
+				"dependencies/eigen/unsupported/Eigen/LevenbergMarquardt",
+				"dependencies/eigen/unsupported/Eigen/MatrixFunctions",
+				"dependencies/eigen/unsupported/Eigen/MPRealSupport",
+				"dependencies/eigen/unsupported/Eigen/NNLS",
+				"dependencies/eigen/unsupported/Eigen/NonLinearOptimization",
+				"dependencies/eigen/unsupported/Eigen/NumericalDiff",
+				"dependencies/eigen/unsupported/Eigen/OpenGLSupport",
+				"dependencies/eigen/unsupported/Eigen/Polynomials",
+				"dependencies/eigen/unsupported/Eigen/SparseExtra",
+				"dependencies/eigen/unsupported/Eigen/SpecialFunctions",
+				"dependencies/eigen/unsupported/Eigen/Splines"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Devel",
+			"destination" : "include/eigen3/unsupported/Eigen",
+			"paths" : 
+			[
+				"dependencies/eigen/unsupported/Eigen/src"
+			],
+			"type" : "directory"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "dependencies/eigen/unsupported/Eigen",
+		"source" : "dependencies/eigen/unsupported/Eigen"
+	}
+}
