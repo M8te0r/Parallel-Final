@@ -1,3 +1,0 @@
-D:\dev_environment\CMake\bin\cmake.exe -E rm -f CMakeFiles\parallel_final.dir/objects.a
-D:\dev_environment\MinGW\x86_64-15.2.0-release-win32-seh-ucrt-rt_v13-rev0\mingw64\bin\ar.exe qc CMakeFiles\parallel_final.dir/objects.a @CMakeFiles\parallel_final.dir\objects1.rsp
-D:\dev_environment\MinGW\x86_64-15.2.0-release-win32-seh-ucrt-rt_v13-rev0\mingw64\bin\g++.exe  -Wa,-mbig-obj,-O2 -g -Wl,--whole-archive CMakeFiles\parallel_final.dir/objects.a -Wl,--no-whole-archive -o D:\dev_project\Parallel-Final\bin\parallel_final.exe -Wl,--out-implib,D:\dev_project\Parallel-Final\bin\libparallel_final.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\parallel_final.dir\linkLibs.rsp
